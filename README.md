@@ -112,6 +112,37 @@ Open your browser at `http://localhost:8501`.
 
 ## 5. Deployment Guide
 
+### Netlify compatibility
+
+The current application uses **Python Streamlit**, not Vite, Create React App,
+Next.js, or plain static HTML. The working application entry point is
+`backend/streamlit_app.py`, with dependencies in `backend/requirements.txt`.
+There is no `package.json`, JavaScript build script, React Router configuration,
+or generated `dist`, `build`, or `out` directory.
+
+**Netlify cannot host the current Streamlit application.** Streamlit requires a
+long-running Python server and persistent WebSocket connections for interactive
+widgets and session state. Netlify's static hosting and request-based Functions
+cannot run that server. Adding a static publish directory or an SPA redirect
+would not make the application work; Streamlit's embedded HTML/CSS is not a
+standalone frontend that can be published separately.
+
+Consequently, `npm install` and `npm run build` do not apply to this repository,
+and no `netlify.toml` or SPA fallback has been added. Do not set Netlify's publish
+directory to the repository root: it contains backend source and pipeline data,
+not a deployable website.
+
+To deploy the existing application, use Streamlit Community Cloud as described
+below, or another host that supports a continuously running Python service.
+
+Hosting the application on Netlify requires a frontend rewrite (for example,
+React with Vite producing `dist`) and moving request-based backend operations
+into Netlify Functions. Streamlit widgets, navigation, and session handling
+would need browser-side replacements; persistent application records would
+need Netlify Database and uploaded files would need Netlify Blobs. Once that
+rewrite exists, configure `npm run build`, publish `dist`, and add a fallback
+to `/index.html` if the frontend uses client-side routing.
+
 ### Deploying to Streamlit Community Cloud
 1. Push the repository to GitHub.
 2. In [share.streamlit.io](https://share.streamlit.io), connect your repository.
